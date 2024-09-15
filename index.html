@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastebin Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+        }
+        form {
+            margin: 20px 0;
+        }
+        input, textarea {
+            display: block;
+            width: calc(100% - 22px);
+            margin: 10px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        #pastelist {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #pastelist ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #pastelist li {
+            margin-bottom: 10px;
+        }
+        #pastelist a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        #pastelist a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pastebin Admin Panel</h1>
+        <form id="pasteForm">
+            <input type="text" id="pasteTitle" placeholder="Paste Title" required>
+            <textarea id="pasteContent" rows="10" placeholder="Paste Content" required></textarea>
+            <button type="submit">Post Paste</button>
+        </form>
+        <div id="status"></div>
+        <div id="pastelist">
+            <h2>Recent Pastes</h2>
+            <ul id="pastList">
+                <!-- List of pastes will be appended here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'fw1TP2aocJeX4p3DnYmXs23OiKS4LdTu';
+        const apiUrl = 'https://pastebin.com/api/api_post.php';
+
+        document.getElementById('pasteForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('pasteTitle').value;
+            const content = document.getElementById('pasteContent').value;
+            const data = new URLSearchParams();
+            data.append('api_dev_key', apiKey);
+            data.append('api_option', 'paste');
+            data.append('api_paste_code', content);
+            data.append('api_paste_name', title);
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: data
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.text();
+                const pasteUrl = `https://pastebin.com/${result}`;
+                document.getElementById('status').innerHTML = `Pastebin URL: <a href="${pasteUrl}" target="_blank">${pasteUrl}</a>`;
+
+                // Add paste to the list
+                const pasteList = document.getElementById('pastList');
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<a href="${pasteUrl}" target="_blank">${title}</a>`;
+                pasteList.appendChild(listItem);
+
+                // Clear form
+                document.getElementById('pasteTitle').value = '';
+                document.getElementById('pasteContent').value = '';
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('status').innerText = 'An error occurred while posting to Pastebin. Please check the console for details.';
+            }
+        });
+    </script>
+</body>
+</html>
